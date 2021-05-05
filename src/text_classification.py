@@ -1,7 +1,7 @@
 """
 Train the model using different algorithms.
-Creates two files in output: `accuracy_scores.png`,
-`accuracy_scores.png`, and `misclassified_msgs.txt`.
+Creates 3 files in output: `accuracy_scores.png`,
+`model.joblib`, and `misclassified_msgs.txt`.
 """
 
 import pandas as pd
