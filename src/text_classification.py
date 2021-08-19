@@ -93,7 +93,7 @@ def main():
     plt.savefig("output/accuracy_scores.png")
 
     # Store "best" classifier
-    dump(classifiers['Decision Tree'], 'output/model.joblib')
+    dump(classifiers[algorithm], 'output/'+algorithm+'_model.joblib')
 
 if __name__ == "__main__":
     main()
