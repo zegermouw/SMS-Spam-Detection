@@ -1,5 +1,6 @@
 """
 Train the model using different algorithms.
+Gets 1 variable as input: algorithm name. See 'classifiers' dictionary.
 Creates 3 files in output: `accuracy_scores.png`,
 `model.joblib`, and `misclassified_msgs.txt`.
 """
@@ -16,6 +17,7 @@ from joblib import dump, load
 import matplotlib
 import matplotlib.pyplot as plt
 from text_preprocessing import _load_data
+from sys import argv
 
 pd.set_option('display.max_colwidth', None)
 
@@ -33,7 +35,7 @@ def predict_labels(classifier, X_test):
     return classifier.predict(X_test)
 
 def main():
-
+    algorithm = str(argv[1])
     raw_data = _load_data()
     preprocessed_data = load('output/preprocessed_data.joblib')
 
@@ -57,23 +59,24 @@ def main():
     pred = dict()
     # save misclassified messages
     file = open('output/misclassified_msgs.txt', 'a', encoding='utf-8')
-    for key, value in classifiers.items():
-        train_classifier(value, X_train, y_train)
-        pred[key] = predict_labels(value, X_test)
-        pred_scores[key] = [accuracy_score(y_test, pred[key])]
-        print('\n############### ' + key + ' ###############\n')
-        print(classification_report(y_test, pred[key]))
+    key = algorithm
+    value = classifiers.get(key)
+    train_classifier(value, X_train, y_train)
+    pred[key] = predict_labels(value, X_test)
+    pred_scores[key] = [accuracy_score(y_test, pred[key])]
+    print('\n############### ' + key + ' ###############\n')
+    print(classification_report(y_test, pred[key]))
 
-        # write misclassified messages into a new text file
-        file.write('\n#################### ' + key + ' ####################\n')
-        file.write('\nMisclassified Spam:\n\n')
-        for msg in test_messages[y_test < pred[key]]:
-            file.write(msg)
-            file.write('\n')
-        file.write('\nMisclassified Ham:\n\n')
-        for msg in test_messages[y_test > pred[key]]:
-            file.write(msg)
-            file.write('\n')
+    # write misclassified messages into a new text file
+    file.write('\n#################### ' + key + ' ####################\n')
+    file.write('\nMisclassified Spam:\n\n')
+    for msg in test_messages[y_test < pred[key]]:
+        file.write(msg)
+        file.write('\n')
+    file.write('\nMisclassified Ham:\n\n')
+    for msg in test_messages[y_test > pred[key]]:
+        file.write(msg)
+        file.write('\n')
     file.close()
 
     print('\n############### Accuracy Scores ###############')
@@ -90,7 +93,7 @@ def main():
     plt.savefig("output/accuracy_scores.png")
 
     # Store "best" classifier
-    dump(classifiers['Decision Tree'], 'output/model.joblib')
+    dump(classifiers[algorithm], 'output/'+algorithm+'_model.joblib')
 
 if __name__ == "__main__":
     main()

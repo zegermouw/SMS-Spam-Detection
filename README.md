@@ -28,7 +28,7 @@ c) Run various scripts
 $ python src/get_data.py
 $ python src/read_data.py
 $ python src/text_preprocessing.py
-$ python src/text_classification.py
+$ python src/text_classification.py [algorithm]
 ```
 
 d) Serve the model as a REST API
