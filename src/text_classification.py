@@ -34,17 +34,14 @@ def train_classifier(classifier, X_train, y_train):
 def predict_labels(classifier, X_test):
     return classifier.predict(X_test)
 
-def main():
-    algorithm = str(argv[1])
-    raw_data = _load_data()
-    preprocessed_data = load('output/preprocessed_data.joblib')
 
+def generate_model(algorithm, raw_data, preprocessed_data):
     (X_train, X_test,
      y_train, y_test,
      _, test_messages) = my_train_test_split(preprocessed_data,
                                              raw_data['label'],
                                              raw_data['message'])
-
+                                             
     classifiers = {
         'SVM': SVC(),
         'Decision Tree': DecisionTreeClassifier(),
@@ -54,15 +51,25 @@ def main():
         'AdaBoost': AdaBoostClassifier(),
         'Bagging Classifier': BaggingClassifier()
     }
+    classifier = classifiers.get(algorithm)
+    train_classifier(classifier, X_train, y_train)
+    return classifier, X_train, X_test, y_train, y_test, test_messages
+    
+    
+def main():
+    algorithm = str(argv[1])
+    raw_data = _load_data()
+    preprocessed_data = load('output/preprocessed_data.joblib')
+    
 
     pred_scores = dict()
     pred = dict()
     # save misclassified messages
     file = open('output/misclassified_msgs.txt', 'a', encoding='utf-8')
     key = algorithm
-    value = classifiers.get(key)
-    train_classifier(value, X_train, y_train)
-    pred[key] = predict_labels(value, X_test)
+    classifier, X_train, X_test, y_train, y_test, test_messages =  generate_model(algorithm, raw_data, preprocessed_data)
+    
+    pred[key] = predict_labels(classifier, X_test)
     pred_scores[key] = [accuracy_score(y_test, pred[key])]
     print('\n############### ' + key + ' ###############\n')
     print(classification_report(y_test, pred[key]))
@@ -93,7 +100,7 @@ def main():
     plt.savefig("output/accuracy_scores.png")
 
     # Store "best" classifier
-    dump(classifiers[algorithm], 'output/'+algorithm+'_model.joblib')
+    dump(classifier, 'output/'+algorithm+'_model.joblib')
 
 if __name__ == "__main__":
     main()
